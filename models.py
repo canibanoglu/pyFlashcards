@@ -22,22 +22,36 @@ association_table = Table('association', Base.metadata,
 )
 
 class Flashcard(Base, StatsMixin):
+    """
+    This class represents one flashcard. All Flashcard objects must have a
+    question and an answer.
+    """
     question = Column(Unicode(length=200))
     answer = Column(Unicode(length=200))
     date_added = Column(DateTime)
     needs_review = Column(Boolean)
     review_count = Column(Integer)
 
-    def __init__(self, question, answer):
+    def __init__(self, question, answer, date_added=None,
+                 needs_review=False,
+                 review_count=0,
+                 mistakes=0,
+                 corrects=0):
         self.question = question
         self.answer = answer
-        self.date_added = datetime.now()
-        self.needs_review = False
-        self.review_count = 0
-        self.mistakes = 0
-        self.corrects = 0
+        self.date_added = datetime.now() if not date_added else date_added
+        self.needs_review = needs_review
+        self.review_count = review_count
+        self.mistakes = mistakes
+        self.corrects = corrects
 
 class Session(Base, StatsMixin):
+    """
+    This class represents one training session with the application.
+    They are simply a collection of Flashcard objects with an associated date
+    which represents the date of the training session.
+    """
+
     date = Column(DateTime)
     cards = relationship("Flashcard",
                 secondary=association_table,
@@ -47,3 +61,15 @@ class Session(Base, StatsMixin):
         self.date = datetime.now()
         self.mistakes = 0
         self.corrects = 0
+
+    def __iter__(self):
+        for card in self.cards:
+            yield card
+
+    def addCards(self, cards):
+        """
+        Adds all the cards passed to this method to this Session object.
+        The cards parameter is a list containing Flashcard objects.
+        """
+        self.cards.extend(cards)
+

@@ -31,8 +31,10 @@ class Flashcard(Base, StatsMixin):
     date_added = Column(DateTime)
     needs_review = Column(Boolean)
     review_count = Column(Integer)
+    category_id = Column(Integer, ForeignKey('category.id'))
+    category = relationship('Category', backref=backref('cards'))
 
-    def __init__(self, question, answer, date_added=None,
+    def __init__(self, question, answer, category, date_added=None,
                  needs_review=False,
                  review_count=0,
                  mistakes=0,
@@ -72,4 +74,11 @@ class Session(Base, StatsMixin):
         The cards parameter is a list containing Flashcard objects.
         """
         self.cards.extend(cards)
+
+class Category(Base):
+    """
+    Represents a category that a card can belong to.
+    """
+
+    name = Column(Unicode(length=80))
 

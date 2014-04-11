@@ -1,3 +1,4 @@
+from sqlalchemy.sql.expression import func
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from contextlib import contextmanager
@@ -21,8 +22,9 @@ class FlashcardsDB(object):
             self.db_path = os.path.join(pwd, self.db_name)
         else:
             self.db_path = db_path
-        self.engine = create_engine('sqlite://' + self.db_path, echo=True)
+        self.engine = create_engine('sqlite://' + self.db_path, echo=debug)
         self.session_factory = sessionmaker(bind=self.engine)
+        self.db_session = self.session_factory()
 
         if debug or not db_exists:
             self._initDB()
@@ -30,24 +32,60 @@ class FlashcardsDB(object):
     def _initDB(self):
         models.Base.metadata.create_all(self.engine)
 
-    @contextmanager
-    def _db_session_scope():
-        session = self.session_factory()
-        try:
-            yield session
-            session.commit()
-        except:
-            session.rollback()
-            raise
-        finally:
-            session.close()
+    def add_card(self, card):
+        """
+        Adds the given card to the database. If a card with the question
+        is already present in the database, it will be marked for review.
+        Returns True if a new card was added, False if we marked an existing
+        one for review.
+        """
+        card_check = self.db_session.query(models.Flashcard).\
+                                     filter_by(question=card.question,\
+                                     category=card.category).\
+                                     first()
+        if card_check:
+            card_check.needs_review = True
+        else:
+            self.db_session.add(card)
+        return not card_check
 
-    def commit(self, objects):
+    def add_category(self, category):
         """
-        Commits all the objects passed to this method to the database.
-        objects is a list containing model.Session and model.Flashcard objects.
+        Adds the given category to the database. Works the same as add_card
+        method.
         """
-        with self._db_session_scope() as db_session:
-            db_session.add_all(objects)
+        category_check = self.db_session.query(models.Category).\
+                                         filter_by(name=category.name).\
+                                         first()
+        if not category_check:
+            self.db_session.add(category)
+        return not category_check
+
+    def fuzzy_search(self, class_string, partial_string):
+        """
+        Performs a fuzzy search (using the LIKE keyword) with the given
+        parameters.
+        """
+        cls = getattr(models, class_string)
+        if class_string == "Flashcard":
+            field = getattr(cls, "question")
+        elif class_string == "Category":
+            field = getattr(cls, "name")
+        like_string = "%" + partial_string + "%"
+        return self.db_session.query(cls).filter(field.like(like_string)).all()
+
+
+    def create_session(self, review=False, limit=50):
+        if review:
+            cards = self.db_session.query(models.Flashcard).\
+                                    filter_by(needs_review = True).\
+                                    limit(limit)
+        else:
+            cards = self.db_session.query(models.Flashcard).\
+                                    order_by(func.random()).\
+                                    limit(limit)
+        f_session = models.Session()
+        f_session.addCards(cards)
+        return f_session
 
 

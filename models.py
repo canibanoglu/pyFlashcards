@@ -32,7 +32,7 @@ class Flashcard(Base, StatsMixin):
     needs_review = Column(Boolean)
     review_count = Column(Integer)
     category_id = Column(Integer, ForeignKey('category.id'))
-    category = relationship('Category', backref=backref('cards'))
+    category = relationship('Category')
 
     def __init__(self, question, answer, category, date_added=None,
                  needs_review=False,
@@ -46,6 +46,7 @@ class Flashcard(Base, StatsMixin):
         self.review_count = review_count
         self.mistakes = mistakes
         self.corrects = corrects
+        self.category = category
 
 class Session(Base, StatsMixin):
     """
@@ -81,4 +82,7 @@ class Category(Base):
     """
 
     name = Column(Unicode(length=80))
+
+    def __init__(self, name):
+        self.name = name
 

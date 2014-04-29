@@ -12,7 +12,7 @@ class FlashcardsDB(object):
     """
     db_name = 'flashcards.db'
 
-    def __init__(self, db_path=None, debug=False):
+    def __init__(self, db_path=None, debug=False, echo=False):
         pwd = os.path.realpath(__file__)
         db_exists = os.path.exists(os.path.join(pwd, self.db_name))
         if debug:
@@ -22,7 +22,7 @@ class FlashcardsDB(object):
             self.db_path = os.path.join(pwd, self.db_name)
         else:
             self.db_path = db_path
-        self.engine = create_engine('sqlite://' + self.db_path, echo=debug)
+        self.engine = create_engine('sqlite://' + self.db_path, echo=echo)
         self.session_factory = sessionmaker(bind=self.engine)
         self.db_session = self.session_factory()
 
@@ -49,6 +49,16 @@ class FlashcardsDB(object):
             self.db_session.add(card)
         return not card_check
 
+    def get_cards(self, category=None):
+        # Add some form of limited searching abilities here
+        # Like adding a new argument and checking for that
+        if category and names:
+            return self.db_session.query(models.Flashcard).\
+                                   filter_by(category=category).\
+                                   all()
+        else:
+            return self.db_session.query(models.Flashcard).all()
+
     def add_category(self, category):
         """
         Adds the given category to the database. Works the same as add_card
@@ -60,6 +70,11 @@ class FlashcardsDB(object):
         if not category_check:
             self.db_session.add(category)
         return not category_check
+
+    def get_categories(self):
+        # Add some form of limited searching abilities here
+        # Like adding a new argument and checking for that
+        return self.db_session.query(models.Category).all()
 
     def fuzzy_search(self, class_string, partial_string):
         """
@@ -75,7 +90,7 @@ class FlashcardsDB(object):
         return self.db_session.query(cls).filter(field.like(like_string)).all()
 
 
-    def create_session(self, review=False, limit=50):
+    def create_session(self, category, review=False, limit=50):
         if review:
             cards = self.db_session.query(models.Flashcard).\
                                     filter_by(needs_review = True).\

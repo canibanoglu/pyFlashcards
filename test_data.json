@@ -1,0 +1,60 @@
+{
+  "categories":
+  [
+    "Étranger1.3",
+    "Étranger1.4"
+  ],
+  "cards":
+  [
+    {
+      "category": "Étranger1.3",
+      "question": "soulager",
+      "answer": "to relieve, to soothe"
+    },
+    {
+      "category": "Étranger1.3",
+      "question": "s'amonceler",
+      "answer": "to heap/to pile up, to accumulate"
+    },
+    {
+      "category": "Étranger1.3",
+      "question": "dépuiller",
+      "answer": "to go through, to analyze, to study, to process, [lapin] to skin, [câble] to strip"
+    },
+    {
+      "category": "Étranger1.3",
+      "question": "expédition",
+      "answer": "féminin | [envoi] sending, dispatch"
+    },
+    {
+      "category": "Étranger1.3",
+      "question": "noyer",
+      "answer": "to drown, [moteur, vallée] to flood"
+    },
+    {
+      "category": "Étranger1.4",
+      "question": "mousseux",
+      "answer": "frothy"
+    },
+    {
+      "category": "Étranger1.4",
+      "question": "se coller",
+      "answer": "to press oneself against somebody"
+    },
+    {
+      "category": "Étranger1.4",
+      "question": "gronder",
+      "answer": "to tell off, to scold"
+    },
+    {
+      "category": "Étranger1.4",
+      "question": "semelle",
+      "answer": "féminin | [de chaussure] sole"
+    },
+    {
+      "category": "Étranger1.4",
+      "question": "griffe",
+      "answer": "claw"
+    }
+  ]
+}
